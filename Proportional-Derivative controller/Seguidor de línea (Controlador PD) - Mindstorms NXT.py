@@ -9,9 +9,14 @@ from time import sleep
 linea = 399
 concreto = 465
 
-setpoint = 440 #(linea + concreto)/2
+setpoint = 440 # era (linea + concreto)/2
+
+Kp = 1/15
+Kd = 0.5
 
 base_action=50
+prev_error = 0
+timestep = 0.015
 
 brick = nxt.backend.bluetooth.BluetoothSock(
     bluetooth=bluez, host='00:16:53:11:13:4D')
@@ -27,13 +32,15 @@ with brick.connect() as b:
         # Tomar la medida del sensor de Luz
         medida = sensorLuz.get_sample()
         print(medida)
+        # Calcular error
+        error = setpoint - medida
+        # Calcular derivada del error
+        derivative = (error - prev_error) / timestep
+        prev_error = error
         # Calcular una accion dependiendo del valor de la Luz
-        action =  (1/15)*(setpoint - medida)
+        action = Kp * error + Kd * derivative
         # Enviar acciones a cada motor
         motorDerecha.run(max(-127,min(int(-base_action + action),127)), regulated=True)
         motorIzquierda.run(max(-127,min(int(-base_action - action),127)), regulated=True)
         # Esperar 0.2 segundos
-        sleep(0.015)
-
-        ## linea: 399
-        ## concreto: 465
+        sleep(timestep)
