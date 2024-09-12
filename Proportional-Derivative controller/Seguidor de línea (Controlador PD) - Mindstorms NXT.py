@@ -6,13 +6,13 @@ import nxt.sensor.generic
 
 from time import sleep
 
-linea = 399
-concreto = 465
+linea = 260
+concreto = 320
 
-setpoint = 440 # era (linea + concreto)/2
+setpoint = (linea + concreto)/2
 
 Kp = 1/15
-Kd = 0.5
+Kd = 0.01
 
 base_action=50
 prev_error = 0
@@ -42,5 +42,5 @@ with brick.connect() as b:
         # Enviar acciones a cada motor
         motorDerecha.run(max(-127,min(int(-base_action + action),127)), regulated=True)
         motorIzquierda.run(max(-127,min(int(-base_action - action),127)), regulated=True)
-        # Esperar 0.2 segundos
+        # Esperar timestep segundos
         sleep(timestep)
